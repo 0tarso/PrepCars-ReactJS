@@ -1,8 +1,9 @@
 {
   "files": [],
   "compilerOptions": {
-    "noEmit": false,
-    "skipLibCheck": true
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": false
   },
   "references": [
     {
