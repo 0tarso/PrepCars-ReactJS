@@ -41,6 +41,7 @@ const Car = () => {
 
             } catch (error) {
                 toast.error("Erro ao buscar veículo. Tente mais tarde!")
+                console.log(error)
             }
         }
         loadCar()
