@@ -1,4 +1,4 @@
-import { CarsDashProps } from '../../pages/dashboard/Dashboard.types'
+import { CarsDashProps } from "../../types"
 
 interface ModalProps {
   carInfo: CarsDashProps
