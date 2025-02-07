@@ -20,15 +20,16 @@ const Favorites = () => {
     const loadData = async () => {
       try {
         const favoritesID = await loadFavs(null, "favorites");
+        if (Array.isArray(favoritesID)) {
+          const listFavorites = await Promise.all(
+            favoritesID.map(async (id) => {
+              const data = await fetchData({ to: "carFavorites", id: id });
+              return data as CarsProps;
+            })
+          );
 
-        const listFavorites = await Promise.all(
-          favoritesID.map(async (id) => {
-            const data = await fetchData({ to: "carFavorites", id: id });
-            return data as CarsProps;
-          })
-        );
-
-        setCarsFav(listFavorites);
+          setCarsFav(listFavorites);
+        }
 
       } catch (error) {
         console.error(error);

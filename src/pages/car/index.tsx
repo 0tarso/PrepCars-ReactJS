@@ -35,9 +35,14 @@ const Car = () => {
                 return
             }
 
+
             try {
                 const data = await fetchData({ to: "car", id: id })
-                setCarDetails({ id: data.id, ...data } as CarDetailsProps);
+                if (!data || Array.isArray(data)) {
+                    throw new Error("Erro ao buscar veículos. Dados inválidos")
+                }
+
+                setCarDetails({ id: data?.id, ...data } as CarDetailsProps);
 
             } catch (error) {
                 toast.error("Erro ao buscar veículo. Tente mais tarde!")
