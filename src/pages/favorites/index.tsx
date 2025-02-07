@@ -1,13 +1,20 @@
-import { useEffect, useState } from 'react'
-import Container from '../../components/container'
-import DashboardHeader from '../../components/dashboardHeader'
-import HeaderPath from '../../components/headerPath'
-import useFirebase from '../../hooks/useFirebase'
-import { CarsProps } from '../../types'
+//React
 import { toast } from 'react-toastify'
+import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+
+//Components
 import Spinner from '../../components/spinner'
 import CarCard from '../../components/carCard'
-import { Link } from 'react-router-dom'
+import Container from '../../components/container'
+import HeaderPath from '../../components/headerPath'
+import DashboardHeader from '../../components/dashboardHeader'
+
+//Hook Firebase
+import useFirebase from '../../hooks/useFirebase'
+
+//TS interface
+import { CarsProps } from '../../types'
 
 const Favorites = () => {
   const { loadFavs, fetchData } = useFirebase()

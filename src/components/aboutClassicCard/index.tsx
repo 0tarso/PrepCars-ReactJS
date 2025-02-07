@@ -1,3 +1,5 @@
+
+//Assets
 import mecaImg from '../../assets/4062.jpg'
 import MotionDiv from '../motionDiv'
 

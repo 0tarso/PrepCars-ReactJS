@@ -1,6 +1,9 @@
+//Assets
 import carImg from '../../assets/18041.jpg'
-import { FaHeart } from 'react-icons/fa'
 import MotionDiv from '../motionDiv'
+
+//React
+import { FaHeart } from 'react-icons/fa'
 import { useEffect, useState } from 'react'
 
 
