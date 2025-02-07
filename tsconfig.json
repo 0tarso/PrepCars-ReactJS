@@ -1,6 +1,7 @@
 {
   "files": [],
   "compilerOptions": {
+    "strict": false,
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": false
