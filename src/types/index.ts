@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore"
+
 export interface LoginProps {
   email: string
   password: string
@@ -5,7 +7,7 @@ export interface LoginProps {
 
 export interface FetchDataProps {
   to: "home" | "dashboard" | "car" | "favorites" | "carFavorites" | "search"
-  id?: string | undefined
+  id?: string
   search?: string
 }
 
@@ -32,7 +34,7 @@ export interface CarsDashProps {
   images: CarImageProps[];
   uid: string;
   favoriteCount: number | undefined
-  created: Date
+  created: Timestamp
 }
 
 export interface CarDetailsProps {

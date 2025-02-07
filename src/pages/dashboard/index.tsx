@@ -22,10 +22,9 @@ import useFirebase from "../../hooks/useFirebase";
 
 
 const Dashboard = () => {
-  const date = new Date()
 
   const { fetchData, deleteCarData } = useFirebase()
-  const [carsDash, setCarsDash] = useState<CarsDashProps[] | null | undefined>(null)
+  const [carsDash, setCarsDash] = useState<CarsDashProps[] | null>(null)
   const [deleteCar, setDeleteCar] = useState<string | null>(null)
 
   const { user } = useContext(AuthContext)
@@ -33,7 +32,10 @@ const Dashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       const data = await fetchData({ to: "dashboard" })
-      setCarsDash(data)
+
+      if (Array.isArray(data)) {
+        setCarsDash(data as CarsDashProps[])
+      }
     }
 
     loadData()
@@ -51,6 +53,7 @@ const Dashboard = () => {
 
     } catch (error) {
       toast.error("Erro ao deletar veículo. Tente mais tarde!")
+      console.log(error)
     }
   }
 
@@ -76,7 +79,7 @@ const Dashboard = () => {
         <>
           <main className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 fadeIn">
 
-            {carsDash.map(car => (
+            {carsDash?.map(car => (
               <section key={car.id}
                 className="w-full bg-gray-100 rounded-lg px-1 py-1 relative"
               >
@@ -96,7 +99,7 @@ const Dashboard = () => {
 
                 )}
 
-                {car.favoriteCount > 0 ? (
+                {car.favoriteCount && car.favoriteCount > 0 ? (
                   <div className="drop-shadow-md bg-gradient-to-r from-red-700 to-red-500 absolute right-1 rounded-md p-2 flex flex-col">
                     <span className="text-white">Esse carro já tem</span>
                     <span className="font-bold text-center text-white text-lg">{car.favoriteCount} {car.favoriteCount > 1 ? "Favoritos" : "Favorito"}</span>
@@ -109,7 +112,7 @@ const Dashboard = () => {
 
                 <div className="absolute right-1 top-[260px] flex flex-row justify-center p-1 rounded-md drop-shadow-md w-[58%] bg-gradient-to-r from-red-700 to-red-500 text-white">
                   <span className="font-medium">Anunciado em:</span>
-                  <p className="font-medium">{date.getDay(car.created)}/{date.getMonth(car.created)}/{date.getFullYear(car.created)} </p>
+                  <p className="font-medium">{car.created.toDate().getDate()}/{car.created.toDate().getMonth()}/{car.created.toDate().getFullYear()} </p>
 
                 </div>
 

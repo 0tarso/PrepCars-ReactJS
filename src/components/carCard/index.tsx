@@ -16,7 +16,7 @@ import { CarCardProps, FavoriteCarProps } from '../../types'
 
 import useFirebase from '../../hooks/useFirebase'
 
-const CarCard = ({ car, reloadPage, isFavPage }: CarCardProps) => {
+const CarCard = ({ car, reloadPage = () => { }, isFavPage }: CarCardProps) => {
 
   const { user } = useContext(AuthContext)
   const { addCarFavorite, removeCarFavorite, loadFavs } = useFirebase()

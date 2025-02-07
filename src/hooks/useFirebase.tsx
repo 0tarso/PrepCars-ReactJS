@@ -16,7 +16,6 @@ import { AuthContext } from "../contexts/AuthContext"
 import { CarsDashProps, CarsProps, FavoriteCarProps, FetchDataProps, LoginProps } from "../types"
 
 
-
 const useFirebase = () => {
   const { handleInfoUser, user } = useContext(AuthContext)
   const navigate = useNavigate()
@@ -147,7 +146,8 @@ const useFirebase = () => {
           const snapshot = await getDocs(queryRef);
           listCars = snapshot.docs.map(doc => ({
             id: doc.id,
-            ...(doc.data() as Omit<CarsDashProps, "id">)
+            created: doc.data().created.toDate(),
+            ...(doc.data() as Omit<CarsDashProps, "id" | "created">)
           }));
 
         } catch (error) {
@@ -160,7 +160,8 @@ const useFirebase = () => {
 
       case "car": {
         try {
-          const docRef = doc(db, "cars", id)
+          const isValidId = id ?? ""
+          const docRef = doc(db, "cars", isValidId)
           const snapshot = await getDoc(docRef);
 
           if (!snapshot.exists()) {
@@ -182,7 +183,8 @@ const useFirebase = () => {
 
       case "carFavorites": {
         try {
-          const docRef = doc(db, "cars", id)
+          const isValidId = id ?? ""
+          const docRef = doc(db, "cars", isValidId)
           const snapshot = await getDoc(docRef);
 
           if (!snapshot.exists()) {
@@ -246,7 +248,7 @@ const useFirebase = () => {
 
   const removeCarFavorite = async (carFavorite: FavoriteCarProps) => {
     const favoritesRef = collection(db, "favorites")
-    const queryDelete = query(favoritesRef, where("userID", "==", user.uid), where("carID", "==", carFavorite.carID))
+    const queryDelete = query(favoritesRef, where("userID", "==", user?.uid), where("carID", "==", carFavorite.carID))
 
     const carRef = doc(db, "cars", carFavorite.carID)
 
@@ -273,7 +275,7 @@ const useFirebase = () => {
 
       case "carCard": {
 
-        const cardFavoritesQuery = query(favoritesRef, where("userID", "==", user.uid), where("carID", "==", car.id))
+        const cardFavoritesQuery = query(favoritesRef, where("userID", "==", user?.uid), where("carID", "==", car?.id))
 
         let isFavorite: boolean = false
 
@@ -296,7 +298,7 @@ const useFirebase = () => {
         const favoritesID: string[] = []
 
         try {
-          const favoritesQuery = query(favoritesRef, where("userID", "==", user.uid))
+          const favoritesQuery = query(favoritesRef, where("userID", "==", user?.uid))
 
           const querySnapshot = await getDocs(favoritesQuery)
           querySnapshot.forEach(async (docSnap) => {

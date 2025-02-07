@@ -28,10 +28,15 @@ const Home = () => {
 
             try {
                 const data = await fetchData({ to: "home" })
-                setCars(data)
+
+                if (Array.isArray(data)) {
+                    setCars(data)
+                }
+
 
             } catch (error) {
                 toast.error("Erro ao buscar dados :(")
+                console.log(error)
             }
 
             finally {
@@ -52,10 +57,14 @@ const Home = () => {
         if (searchText === "") {
             try {
                 const data = await fetchData({ to: "home" })
-                setCars(data)
+                if (Array.isArray(data)) {
+                    setCars(data)
+
+                }
 
             } catch (error) {
                 toast.error("Erro ao buscar dados :(")
+                console.log(error)
             }
 
             finally {
@@ -67,7 +76,11 @@ const Home = () => {
 
         try {
             const data = await fetchData({ to: "search", search: searchText })
-            setCars(data)
+
+            if (Array.isArray(data)) {
+                setCars(data)
+
+            }
 
         } catch (error) {
             console.log(error)
