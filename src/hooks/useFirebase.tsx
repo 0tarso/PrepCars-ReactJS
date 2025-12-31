@@ -18,7 +18,7 @@ import api from "../api/api"
 
 
 const useFirebase = () => {
-  const { handleInfoUser, user, setToken } = useContext(AuthContext)
+  const { handleInfoUser, user, } = useContext(AuthContext)
   const navigate = useNavigate()
 
   const handleFirebaseAuthError = (error: unknown) => {
@@ -57,10 +57,8 @@ const useFirebase = () => {
       )
 
       const firebaseUser = credential.user
-      const token = await firebaseUser.getIdToken()
 
 
-      console.log(token)
 
       handleInfoUser({
         uid: firebaseUser.uid,
@@ -68,7 +66,6 @@ const useFirebase = () => {
         email: firebaseUser.email,
       })
 
-      setToken(token)
 
       toast.success(`Bem-vindo(a) ${firebaseUser.displayName ?? ""}`)
       navigate("/dashboard", { replace: true })
@@ -85,7 +82,6 @@ const useFirebase = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
 
       const user = userCredential.user
-      const token = await user.getIdToken()
 
       await updateProfile(user, { displayName: name })
 
@@ -95,7 +91,6 @@ const useFirebase = () => {
         uid: user.uid
       })
 
-      setToken(token)
 
       navigate("/dashboard", { replace: true })
       toast.success(`Bem-vindo(a), ${name}!`)
@@ -162,7 +157,7 @@ const useFirebase = () => {
       case "dashboard": {
         let listCars: CarsDashProps[] = []
 
-        console.log("Dashboard requyensts")
+        console.log("Dashboard")
         try {
 
           // console.log(id)

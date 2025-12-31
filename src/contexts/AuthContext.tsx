@@ -20,21 +20,18 @@ type AuthContextData = {
     loadingAuth: boolean
     user: UserProps | null
     handleInfoUser: (user: UserProps) => void
-    setToken: (token: string | null) => void
 }
 
 export const AuthContext = createContext({} as AuthContextData)
 
 function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<UserProps | null>(null)
-    const [token, setToken] = useState<string | null>(null)
+
     const [loadingAuth, setLoadingAuth] = useState(true)
 
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                const idToken = await firebaseUser.getIdToken()
-                setToken(idToken)
                 setUser({
                     uid: firebaseUser.uid,
                     name: firebaseUser.displayName,
@@ -42,7 +39,6 @@ function AuthProvider({ children }: AuthProviderProps) {
                 })
 
             } else {
-                setToken(null)
                 setUser(null)
             }
 
@@ -63,7 +59,6 @@ function AuthProvider({ children }: AuthProviderProps) {
                 loadingAuth,
                 user,
                 handleInfoUser,
-                setToken,
             }}
         >
             {children}
