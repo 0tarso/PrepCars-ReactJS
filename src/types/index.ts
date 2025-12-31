@@ -34,7 +34,8 @@ export interface CarsDashProps {
   images: CarImageProps[];
   uid: string;
   favoriteCount: number | undefined
-  created: Timestamp
+  created: Date,
+  updated: Date
 }
 
 export interface CarDetailsProps {
@@ -73,5 +74,5 @@ export interface FavoriteCarProps {
 export interface CarCardProps {
   car: CarsProps
   isFavPage?: boolean
-  reloadPage?: () => void
+  onRemoveFavorite?: () => void
 }

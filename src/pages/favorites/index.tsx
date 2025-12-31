@@ -48,7 +48,7 @@ const Favorites = () => {
     }
 
     loadData()
-  }, [carsFav])
+  }, [])
 
 
   const handleDeleteCarCard = (car: CarsProps) => {
@@ -77,7 +77,7 @@ const Favorites = () => {
             key={car.id}
             car={car}
             isFavPage={true}
-            reloadPage={() => handleDeleteCarCard(car)}
+            onRemoveFavorite={() => handleDeleteCarCard(car)}
           />
         ))}
       </div>

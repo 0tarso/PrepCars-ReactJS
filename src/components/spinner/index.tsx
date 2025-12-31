@@ -2,7 +2,7 @@ import { BounceLoader } from 'react-spinners'
 
 const Spinner = () => {
     return (
-        <div className="h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center">
             <BounceLoader
                 color="#ff0000"
                 size={50}

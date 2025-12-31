@@ -1,7 +1,7 @@
 //Firebase
 import { deleteObject, ref } from "firebase/storage"
 import { auth, db, storage } from "../services/firebaseConnection"
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, updateDoc, where } from "firebase/firestore"
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, query, updateDoc, where } from "firebase/firestore"
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth"
 
 //React
@@ -14,10 +14,11 @@ import { AuthContext } from "../contexts/AuthContext"
 
 //Typescript interfaces
 import { CarsDashProps, CarsProps, FavoriteCarProps, FetchDataProps, LoginProps } from "../types"
+import api from "../api/api"
 
 
 const useFirebase = () => {
-  const { handleInfoUser, user } = useContext(AuthContext)
+  const { handleInfoUser, user, setToken } = useContext(AuthContext)
   const navigate = useNavigate()
 
   const handleFirebaseAuthError = (error: unknown) => {
@@ -49,8 +50,27 @@ const useFirebase = () => {
   const loginUser = async (data: LoginProps) => {
 
     try {
-      const user = await signInWithEmailAndPassword(auth, data.email, data.password)
-      toast.success(`Bem-vindo(a) ${user.user.displayName}!`)
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      )
+
+      const firebaseUser = credential.user
+      const token = await firebaseUser.getIdToken()
+
+
+      console.log(token)
+
+      handleInfoUser({
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName,
+        email: firebaseUser.email,
+      })
+
+      setToken(token)
+
+      toast.success(`Bem-vindo(a) ${firebaseUser.displayName ?? ""}`)
       navigate("/dashboard", { replace: true })
 
     } catch (error) {
@@ -62,19 +82,25 @@ const useFirebase = () => {
 
   const registerNewUser = async (data: LoginProps, name: string) => {
     try {
-      const user = await createUserWithEmailAndPassword(auth, data.email, data.password)
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
 
-      await updateProfile(user.user, { displayName: name })
+      const user = userCredential.user
+      const token = await user.getIdToken()
+
+      await updateProfile(user, { displayName: name })
 
       handleInfoUser({
         name: name,
-        email: data.email,
-        uid: user.user.uid
+        email: user.email,
+        uid: user.uid
       })
+
+      setToken(token)
 
       navigate("/dashboard", { replace: true })
       toast.success(`Bem-vindo(a), ${name}!`)
       toast.success("Conta criada com sucesso!")
+
     } catch (error) {
       const message = handleFirebaseAuthError(error)
       toast.error(message)
@@ -116,15 +142,14 @@ const useFirebase = () => {
       }
 
       case "home": {
-        const carsRef = collection(db, 'cars')
-        const queryRef = query(carsRef, orderBy("created", "desc"))
-        const data = [] as CarsProps[]
-
+        let data
         try {
-          const snapshot = await getDocs(queryRef)
-          snapshot.forEach(doc => {
-            data.push({ id: doc.id, ...(doc.data() as Omit<CarsProps, "id">) })
-          })
+          const response = await api.get("cars/all")
+
+          if (response.data) {
+            // console.log(response.data)
+            data = response.data.content
+          }
 
         } catch (error) {
           toast.error("Erro ao buscar veículos. Tente mais tarde.")
@@ -135,20 +160,18 @@ const useFirebase = () => {
       }
 
       case "dashboard": {
-        if (!user?.uid) {
-          return
-        }
-        const carsRef = collection(db, 'cars');
-        const queryRef = query(carsRef, where("uid", "==", user.uid));
         let listCars: CarsDashProps[] = []
 
+        console.log("Dashboard requyensts")
         try {
-          const snapshot = await getDocs(queryRef);
-          listCars = snapshot.docs.map(doc => ({
-            id: doc.id,
-            created: doc.data().created.toDate(),
-            ...(doc.data() as Omit<CarsDashProps, "id" | "created">)
-          }));
+
+          // console.log(id)
+          const response = await api.get("/cars/dashboard")
+
+          if (response.data) {
+            listCars = response.data.content
+          }
+
 
         } catch (error) {
           toast.error("Ops, erro ao buscar seus veículos. Vamos corrigir o mais rápido possível!")
@@ -159,20 +182,19 @@ const useFirebase = () => {
       }
 
       case "car": {
-        try {
-          const isValidId = id ?? ""
-          const docRef = doc(db, "cars", isValidId)
-          const snapshot = await getDoc(docRef);
 
-          if (!snapshot.exists()) {
-            toast.error("Veículo não existe");
-            navigate("/");
-            return;
+        let data
+
+        try {
+          const response = await api.get(`cars/${id}`)
+
+          if (response.data) {
+            // console.log(response.data)
+            data = response.data.content
           }
 
-          // console.log("Carro buscado do banco", snapshot.data());
+          return data
 
-          return snapshot.data()
         } catch (error) {
           console.error("Erro ao buscar veículo no banco", error);
           toast.error("Erro ao buscar veículo");

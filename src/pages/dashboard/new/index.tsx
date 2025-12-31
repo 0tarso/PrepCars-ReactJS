@@ -18,12 +18,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 //Context
 import { AuthContext } from '../../../contexts/AuthContext'
 
-//Firebase
-import { db, storage } from '../../../services/firebaseConnection'
-import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { addDoc, collection } from 'firebase/firestore'
 
 import { v4 as uuidV4 } from 'uuid'
+import api from '../../../api/api'
+import Spinner from '../../../components/spinner'
 
 const schema = z.object({
 	name: z.string().max(50, "Máximo de 50 caracteres").nonempty("Nome obrigatório").toUpperCase(),
@@ -47,6 +45,7 @@ interface ImageItemProps {
 	name: string;
 	previewUrl: string;
 	url: string;
+	publicId: string
 }
 
 
@@ -63,12 +62,14 @@ const NewCarRegister = () => {
 	const [carImages, setCarImages] = useState<ImageItemProps[]>([])
 	const [rulesWarning, setRulesWarning] = useState<boolean>(true)
 
+	const [uploadImageLoading, setUploadImageLoading] = useState(false)
+	const [deleteImageLoading, setDeleteImageLoading] = useState(false)
 
-	function onSubmit(data: FormData) {
+	async function onSubmit(data: FormData) {
 		console.log(data)
 
 		if (carImages.length === 0) {
-			alert("Você deve enviar ao menos 1 imagem do carro a ser cadastrado!")
+			toast.info("Você deve enviar ao menos 1 imagem do carro a ser cadastrado!")
 			return
 		}
 
@@ -76,39 +77,35 @@ const NewCarRegister = () => {
 			return {
 				uid: car.uid,
 				name: car.name,
-				url: car.url
+				url: car.url,
+				publicId: car.publicId
 			}
 		})
 
-		addDoc(collection(db, 'cars'), {
-			name: data.name,
-			model: data.model,
-			brand: data.brand,
-			year: data.year,
-			km: data.km,
-			whatsapp: data.whatsapp,
-			city: data.city,
-			price: data.price,
-			description: data.description,
-			owner: user?.name,
-			uid: user?.uid,
-			created: new Date(),
-			images: carListImages
-		})
-			.then(() => {
-
-				reset()
-				setCarImages([])
-				toast.success(`${data.name} cadastrado com sucesso!`)
-				navigate("/dashboard")
-
-			})
-			.catch((error) => {
-				toast.error("Erro ao cadastrar veículo, tente mais tarde!")
-				console.log(error)
+		try {
+			const response = await api.post("/cars/create", {
+				name: data.name,
+				model: data.model,
+				brand: data.brand,
+				year: Number(data.year),
+				km: Number(data.km),
+				whatsapp: data.whatsapp,
+				city: data.city,
+				price: Number(data.price),
+				description: data.description,
+				owner: user?.name,
+				images: carListImages
 			})
 
-
+			console.log(response)
+			reset()
+			setCarImages([])
+			toast.success(`${data.name} cadastrado com sucesso!`)
+			navigate("/dashboard")
+		} catch (error) {
+			toast.error("Erro ao cadastrar veículo, tente mais tarde!")
+			console.log(error)
+		}
 	}
 
 
@@ -117,10 +114,10 @@ const NewCarRegister = () => {
 			const image = event.target.files[0]
 
 			if (image.type === "image/jpeg" || image.type === "image/png") {
-				await handleUpload(image)
+				await handleUploadImage(image)
 			}
 			else {
-				alert("A imagem deve ser JPEG ou PNG")
+				toast.info("A imagem deve ser JPEG ou PNG")
 				return
 			}
 		}
@@ -128,47 +125,78 @@ const NewCarRegister = () => {
 
 
 
-	async function handleUpload(image: File) {
+	async function handleUploadImage(image: File) {
 		if (!user?.uid) {
 			return
 		}
 
+		setUploadImageLoading(true)
+
 		const currentUid = user.uid
 		const uidImage = uuidV4()
 
-		const uploadRef = ref(storage, `images/${currentUid}/${uidImage}`)
+		const formData = new FormData()
+		formData.append("image", image)
 
-		uploadBytes(uploadRef, image).then((snapshot) => {
+		let data
 
-			getDownloadURL(snapshot.ref).then((downloadUrl) => {
+		try {
+			const response = await api.post("/cars/upload-image", formData)
+			data = response.data.content
+			console.log('Upload Image Data ')
+			console.log(data)
 
-				const imageItem = {
-					name: uidImage,
-					uid: currentUid,
-					previewUrl: URL.createObjectURL(image),
-					url: downloadUrl
-				}
+		} catch (error) {
+			console.log("Error: on image upload")
+			console.log(error)
+			toast.error("Erro ao salvar imagem. Tente novamente.")
+			return
+		}
 
-				setCarImages((images) => [...images, imageItem])
-			})
-		})
+
+		const imageItem = {
+			name: uidImage,
+			uid: currentUid,
+			previewUrl: URL.createObjectURL(image),
+			url: data.url,
+			publicId: data.publicId
+		}
+
+		console.log(imageItem)
+
+		setCarImages((images) => [...images, imageItem])
+
+		setUploadImageLoading(false)
 	}
 
 
 
 	async function handleDeleteImage(item: ImageItemProps) {
-
-		const imagePath = `images/${item.uid}/${item.name}`
-
-		const imgRef = ref(storage, imagePath)
+		setDeleteImageLoading(true)
+		const imagePublicId = item.publicId
+		console.log(imagePublicId)
 
 		try {
-			await deleteObject(imgRef)
+			const response = await api.delete(
+				"/cars/delete-image",
+				{
+					data: {
+						imagePublicId: imagePublicId
+					}
+				})
+
+			console.log(response.data.content)
 			setCarImages(carImages.filter((car) => car.url !== item.url))
-		}
-		catch (error) {
+			toast.info("Imagem deletada")
+
+		} catch (error) {
+			console.log("Erro ao deletar imagem")
 			console.log(error)
+			toast.error("Erro ao deletar imagem")
 		}
+
+		setDeleteImageLoading(false)
+
 	}
 
 
@@ -234,7 +262,13 @@ const NewCarRegister = () => {
 						<button className='h-32 border-2 w-48 rounded-lg flex items-center justify-center cursor-pointer border-black'>
 
 							<div className='absolute cursor-pointer'>
-								<FiUpload size={30} color='#000' />
+								{uploadImageLoading ? (
+									<Spinner />
+
+								) : (
+									<FiUpload size={30} color='#000' />
+
+								)}
 							</div>
 
 							<div className='cursor-pointer'>
@@ -256,6 +290,12 @@ const NewCarRegister = () => {
 								>
 									<FiTrash size={28} color='#fff' />
 								</button>
+								{deleteImageLoading && (
+									<div className='absolute top-auto bottom-auto mx-auto self-center'>
+										<Spinner />
+									</div>
+
+								)}
 								<img className='h-32 rounded-lg w-full object-cover'
 									src={item.previewUrl}
 									alt='Foto do carro'

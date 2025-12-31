@@ -1,19 +1,12 @@
-//React
-import { createContext, ReactNode, useEffect, useState } from 'react'
+// React
+import { createContext, ReactNode, useEffect, useState } from "react"
 
-//Firebase
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../services/firebaseConnection'
+// Firebase
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "../services/firebaseConnection"
 
 interface AuthProviderProps {
     children: ReactNode
-}
-
-type AuthContextData = {
-    signed: boolean,
-    loadingAuth: boolean,
-    handleInfoUser: ({ name, email, uid }: UserProps) => void,
-    user: UserProps | null
 }
 
 interface UserProps {
@@ -22,34 +15,45 @@ interface UserProps {
     email: string | null
 }
 
+type AuthContextData = {
+    signed: boolean
+    loadingAuth: boolean
+    user: UserProps | null
+    handleInfoUser: (user: UserProps) => void
+    setToken: (token: string | null) => void
+}
+
 export const AuthContext = createContext({} as AuthContextData)
 
 function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<UserProps | null>(null)
+    const [token, setToken] = useState<string | null>(null)
     const [loadingAuth, setLoadingAuth] = useState(true)
 
     useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (user) => {
-            if (user) {
+        const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                const idToken = await firebaseUser.getIdToken()
+                setToken(idToken)
                 setUser({
-                    uid: user.uid,
-                    name: user?.displayName,
-                    email: user?.email
+                    uid: firebaseUser.uid,
+                    name: firebaseUser.displayName,
+                    email: firebaseUser.email,
                 })
-                setLoadingAuth(false)
-            }
-            else {
-                setUser(null)
-                setLoadingAuth(false)
-            }
-        });
 
-        return () => unsub();
+            } else {
+                setToken(null)
+                setUser(null)
+            }
+
+            setLoadingAuth(false)
+        })
+
+        return () => unsub()
     }, [])
 
-
-    function handleInfoUser({ name, email, uid }: UserProps) {
-        setUser({ name, email, uid })
+    function handleInfoUser({ uid, name, email }: UserProps) {
+        setUser({ uid, name, email })
     }
 
     return (
@@ -57,8 +61,9 @@ function AuthProvider({ children }: AuthProviderProps) {
             value={{
                 signed: !!user,
                 loadingAuth,
+                user,
                 handleInfoUser,
-                user
+                setToken,
             }}
         >
             {children}

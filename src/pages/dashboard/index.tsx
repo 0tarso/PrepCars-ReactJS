@@ -6,7 +6,6 @@ import ModalDeleteCar from "../../components/modalDeleteCar";
 import DashboardHeader from "../../components/dashboardHeader"
 
 //React
-import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { FiTrash2 } from "react-icons/fi"
 import { useContext, useEffect, useState } from "react";
@@ -19,11 +18,12 @@ import { CarsDashProps } from "../../types";
 
 //Hook Firebase
 import useFirebase from "../../hooks/useFirebase";
+import api from "../../api/api";
 
 
 const Dashboard = () => {
 
-  const { fetchData, deleteCarData } = useFirebase()
+  const { fetchData } = useFirebase()
   const [carsDash, setCarsDash] = useState<CarsDashProps[] | null>(null)
   const [deleteCar, setDeleteCar] = useState<string | null>(null)
 
@@ -31,11 +31,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const data = await fetchData({ to: "dashboard" })
+      const data = await fetchData({ to: "dashboard", id: user?.uid })
 
       if (Array.isArray(data)) {
         setCarsDash(data as CarsDashProps[])
+        console.log(data)
       }
+
     }
 
     loadData()
@@ -47,12 +49,16 @@ const Dashboard = () => {
       return
     }
 
+
     try {
-      await deleteCarData(car)
+      const response = await api.delete(`/cars/${car.id}`)
+
+      console.log(response.data)
+
       setCarsDash((prevCarsDash) => (prevCarsDash as CarsDashProps[]).filter((remainingCar) => remainingCar.id !== car.id))
 
     } catch (error) {
-      toast.error("Erro ao deletar veículo. Tente mais tarde!")
+      console.log("Erro ao deletar carro")
       console.log(error)
     }
   }
@@ -112,7 +118,7 @@ const Dashboard = () => {
 
                 <div className="absolute right-1 top-[260px] flex flex-row justify-center p-1 rounded-md drop-shadow-md w-[58%] bg-gradient-to-r from-red-700 to-red-500 text-white">
                   <span className="font-medium">Anunciado em:</span>
-                  <p className="font-medium">{car.created.toDate().getDate()}/{car.created.toDate().getMonth()}/{car.created.toDate().getFullYear()} </p>
+                  <p className="font-medium">{new Date(car.created).getDate()}/{new Date(car.created).getMonth()}/{new Date(car.created).getFullYear()} </p>
 
                 </div>
 

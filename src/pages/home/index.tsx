@@ -29,6 +29,7 @@ const Home = () => {
             try {
                 const data = await fetchData({ to: "home" })
 
+
                 if (Array.isArray(data)) {
                     setCars(data)
                 }
