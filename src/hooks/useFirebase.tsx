@@ -139,7 +139,7 @@ const useFirebase = () => {
       case "home": {
         let data
         try {
-          const response = await api.get("cars/all")
+          const response = await api.get("/cars/all")
 
           if (response.data) {
             // console.log(response.data)
@@ -181,7 +181,7 @@ const useFirebase = () => {
         let data
 
         try {
-          const response = await api.get(`cars/${id}`)
+          const response = await api.get(`/cars/${id}`)
 
           if (response.data) {
             // console.log(response.data)
