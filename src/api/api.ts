@@ -1,7 +1,7 @@
 import axios from "axios"
 import { auth } from "../services/firebaseConnection";
 
-const baseUrl = import.meta.env.VITE_BACKEND_URL
+const baseUrl = import.meta.env.VITE_BACKEND_SERVICE
 
 const api = axios.create({
   baseURL: `${baseUrl}/api/v1`
