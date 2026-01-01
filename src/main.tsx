@@ -1,5 +1,7 @@
 import './index.css'
-
+import '@fontsource/poppins/800-italic.css';
+//@ts-expect-error sss
+import '@fontsource-variable/roboto';
 //React
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

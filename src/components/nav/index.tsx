@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { FiMenu, FiX } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
+import { AuthContext } from '../../contexts/AuthContext'
 
 const NavBar = () => {
 
   const [menuOpen, setMenuOpen] = useState<boolean>(false)
+
+  const { user } = useContext(AuthContext)
 
   return (
     <div className="w-full items-center flex h-10 bg-gradient-to-r from-red-700 to-red-500 p-2 rounded-lg text-white font-medium gap-4 mb-4 max-md:w-auto max-md:right-3 z-50">
@@ -20,9 +23,13 @@ const NavBar = () => {
         <Link to="/rules">
           <span className="py-1 px-2 rounded-lg hover:bg-white hover:text-red-400 transition-all">Regras</span>
         </Link>
-        <Link to="/register">
-          <span className="py-1 px-2 rounded-lg hover:bg-white hover:text-red-400 transition-all">Criar Conta</span>
-        </Link>
+
+        {!user && (
+
+          <Link to="/register">
+            <span className="py-1 px-2 rounded-lg hover:bg-white hover:text-red-400 transition-all">Criar Conta</span>
+          </Link>
+        )}
       </div>
 
       <button
@@ -44,9 +51,13 @@ const NavBar = () => {
           <Link to="/rules" onClick={() => setMenuOpen(false)}>
             <span className="block py-2 px-4 rounded-lg hover:bg-white hover:text-red-400 transition-all">Regras</span>
           </Link>
-          <Link to="/register" onClick={() => setMenuOpen(false)}>
-            <span className="block py-2 px-4 rounded-lg hover:bg-white hover:text-red-400 transition-all">Criar Conta</span>
-          </Link>
+
+          {!user && (
+
+            <Link to="/register" onClick={() => setMenuOpen(false)}>
+              <span className="block py-2 px-4 rounded-lg hover:bg-white hover:text-red-400 transition-all">Criar Conta</span>
+            </Link>
+          )}
         </div>
       )}
     </div>

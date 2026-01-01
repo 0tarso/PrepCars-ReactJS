@@ -22,7 +22,7 @@ const Header = () => {
             <header className="flex w-full max-w-7xl items-center justify-between px-4 mx-auto">
 
                 <Link to="/">
-                    <img className='w-60'
+                    <img className='w-32'
                         src={logoImg}
                         alt='Logo do site PrepCars'
                     />
