@@ -25,7 +25,7 @@ const Footer = () => {
                     <img src={logoImg} />
 
                 </div>
-                <p>PrepCars. 2025 - Todos os Direitos Reservados</p>
+                <p>PrepCars. {new Date().getFullYear()} - Todos os Direitos Reservados</p>
             </div>
 
         </footer>
