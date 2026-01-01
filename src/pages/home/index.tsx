@@ -135,7 +135,7 @@ const Home = () => {
                 </div>
 
                 <div className="absolute -z-10 top-0 fadeIn">
-                    <span className="transition-all text-[200px] max-lg:text-[130px] max-md:text-[80px] max-sm:text-[70px] text-white/80" style={{ fontFamily: 'Poppins' }}>PrepCars</span>
+                    <span className="transition-all text-[200px] max-lg:text-[130px] max-md:text-[80px] max-sm:text-[70px] text-white/80" style={{ fontFamily: '"Poppins", "Inter", "Arial", sans-serif' }}>PrepCars</span>
                 </div>
 
                 <div className="absolute border-2 -z-20 rounded-xl skew-x-12 opacity-10 border-red-400 w-64 h-24" />
